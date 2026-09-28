@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Virtual companion - The ultimate health care suggester</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Silkscreen:wght@400;700&family=Sora:wght@100..800&display=swap" rel="stylesheet">
+<style>
+:root{--g:linear-gradient(to bottom,#2B2B2B,#101010);--gl:rgba(255,255,255,.1)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#02060f;color:#fff;overflow:hidden}
+body{font-family:'Geist',-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased}
+body.home{font-family:'Sora',system-ui,sans-serif}
+a,button{font:inherit;color:inherit;cursor:pointer;text-decoration:none}
+button{border:0;background:none}
+:focus-visible{outline:2px solid #9fe0ff;outline-offset:3px;border-radius:6px}
+.vid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}
+#bg{background:#050a14}
+#v2{display:none}
+body:not(.home) #v1{display:none}body:not(.home) #v2{display:block}
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;display:none;background:radial-gradient(130% 55% at 50% 45%,rgba(6,10,18,.5),rgba(6,10,18,.2) 60%,rgba(6,10,18,0)),linear-gradient(180deg,rgba(6,10,18,.3),rgba(6,10,18,0) 25%,rgba(6,10,18,0) 60%,rgba(6,10,18,.4))}
+body.home .veil{display:block}
+.bar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:20px 20px;gap:12px}
+@media(min-width:640px){.bar{padding:24px 32px}}@media(min-width:1024px){.bar{padding:24px 48px}}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:17px;letter-spacing:.14em}
+.brand svg{width:23px;fill:#fff}
+.glass{background:var(--gl);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.pill{display:flex;gap:4px;padding:6px;border-radius:999px}
+.pill button{border-radius:999px;padding:6px 16px;font-size:14px;font-weight:500;color:rgba(255,255,255,.8);transition:background .2s,color .2s}
+.pill button:hover,.pill button.on{background:rgba(255,255,255,.12);color:#fff}
+.right{display:flex;gap:12px;align-items:stretch}
+.gb{background:var(--g);border-radius:999px;color:#fff;font-weight:500;font-size:14px;padding:10px 22px;transition:opacity .2s}
+.gb:hover{opacity:.9}
+.gh{border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:10px 22px;font-size:14px;font-weight:500}
+.gh:hover{background:rgba(255,255,255,.1)}
+.burger{display:none;width:42px;height:42px;border-radius:50%;place-items:center;z-index:50}
+.burger svg{width:20px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round}
+@media(max-width:820px){.desk{display:none}.burger{display:grid}}
+#drawer{position:fixed;inset:0;z-index:40;pointer-events:none}
+#drawer .bd{position:absolute;inset:0;background:rgba(0,0,0,.8);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);opacity:0;transition:opacity .3s}
+#drawer .pn{position:absolute;right:0;top:0;height:100%;width:288px;background:rgba(0,0,0,.9);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);transform:translateX(100%);transition:transform .5s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;padding:96px 24px 40px;gap:8px}
+#drawer.open{pointer-events:auto}#drawer.open .bd{opacity:1}#drawer.open .pn{transform:none}
+#drawer .pn button{text-align:left;padding:14px 16px;border-radius:12px;color:rgba(255,255,255,.8);font-weight:500;opacity:0;transform:translateX(24px);transition:.4s}
+#drawer.open .pn button{opacity:1;transform:none}
+#drawer .pn button:hover{background:var(--gl);color:#fff}
+.pg{position:fixed;inset:0;z-index:5;overflow:auto;padding:96px 20px 40px;display:none}
+@media(min-width:1024px){.pg{padding:110px 48px 48px}}
+.pg.on{display:block}
+#home.on{display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:9vh}
+h1{font-weight:424;font-size:clamp(30px,6.2vw,56px);line-height:1.1;letter-spacing:-.01em;max-width:14em}
+.sub{margin-top:16px;color:#a2a9b8;font-weight:446;font-size:clamp(15px,2vw,19px);line-height:1.4;max-width:30em}
+.cta{display:inline-flex;align-items:center;gap:12px;margin-top:26px;padding:15px 28px;border-radius:999px;font-weight:497;font-size:17px;background:linear-gradient(90deg,rgba(255,226,178,.17),rgba(176,206,238,.04) 55%,rgba(150,196,244,.09)),rgba(255,255,255,.08);-webkit-backdrop-filter:blur(20px) saturate(.5);backdrop-filter:blur(20px) saturate(.5);box-shadow:0 0 30px rgba(168,204,252,.16),inset 0 1px 0 rgba(255,251,242,.45);border:1px solid rgba(255,240,215,.35);align-self:flex-start}
+.cta svg{width:16px;fill:none;stroke:#fff;stroke-width:1.6}
+.feats{display:flex;flex-wrap:wrap;gap:14px 30px;margin-top:34px;list-style:none;padding:0;color:#e2ebf5;font-weight:534;font-size:14px}
+.feats li{display:flex;gap:9px;align-items:center}
+.feats svg{width:8px;fill:none;stroke:rgba(214,232,250,.9);stroke-width:1.75;stroke-linecap:round}
+.foot{margin-top:28px;font-size:13px;color:#f4f8fd;opacity:.8}
+.wrap{max-width:820px;margin:0 auto}
+.card{border-radius:16px;padding:20px}@media(min-width:640px){.card{padding:24px}}
+h2{font-size:clamp(24px,4vw,34px);font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.mut{color:rgba(255,255,255,.7);font-size:14px;line-height:1.55;margin-top:8px}
+.card.dk{background:rgba(0,0,0,.42)}
+#log{display:flex;flex-direction:column;gap:12px;height:calc(100vh - 340px);min-height:220px;overflow:auto;margin:16px 0}
+.m{padding:11px 16px;border-radius:16px;font-size:14px;line-height:1.55;max-width:88%}
+.m.b{background:rgba(255,255,255,.14)}.m.u{background:var(--g);margin-left:auto}
+.m h4{font-size:15px;margin-bottom:4px}.m h5{font-size:12px;margin:10px 0 3px;color:#bfe3ff;font-weight:600}
+.m ul{padding-left:18px}.m li{margin:2px 0}.m small{opacity:.65;display:block;margin-top:10px}
+.row{display:flex;gap:8px}
+input[type=text],input[type=email],input[type=password],input[type=search]{flex:1;width:100%;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:12px 18px;font-size:14px;color:#fff;outline:none;font-family:inherit}
+input::placeholder{color:rgba(255,255,255,.45)}
+input:focus{border-color:rgba(159,224,255,.7)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 14px;border-radius:999px;font-size:13px;background:var(--gl);border:1px solid rgba(255,255,255,.15)}
+.chip:hover{background:rgba(255,255,255,.2)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));margin-top:18px}
+.grid .card{text-align:left;transition:background .2s}.grid .card:hover{background:rgba(255,255,255,.18)}
+.grid b{display:block;font-size:15px;margin-bottom:6px}.grid span{font-size:13px;color:rgba(255,255,255,.7);line-height:1.5}
+.tabs{display:flex;gap:6px;margin:18px 0 6px}
+.tabs button{padding:8px 18px;border-radius:999px;font-size:14px;font-weight:500;color:rgba(255,255,255,.8)}.tabs button.on{background:rgba(255,255,255,.16);color:#fff}
+.sv{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-radius:14px;margin-top:10px}
+.sv div{min-width:0}.sv b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sv span{font-size:12px;color:rgba(255,255,255,.6)}
+.sv .row button{font-size:13px;padding:7px 14px}
+#modal{position:fixed;inset:0;z-index:60;display:none;place-items:center;background:rgba(0,0,0,.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:16px}
+#modal.on{display:grid}
+#modal .card{max-width:640px;width:100%;max-height:88vh;overflow:auto;background:rgba(14,18,28,.92)}
+label.f{display:block;font-size:13px;font-weight:500;color:rgba(255,255,255,.8);margin-top:14px}label.f input{margin-top:6px}
+pre{white-space:pre-wrap;font:12px/1.6 inherit;background:rgba(0,0,0,.4);border-radius:10px;padding:14px;margin-top:12px;color:rgba(255,255,255,.85)}
+.disc{position:fixed;bottom:0;left:0;right:0;z-index:20;text-align:center;font-size:11px;color:rgba(255,255,255,.55);padding:6px 12px;background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#chat.pg{padding:84px 20px 56px;overflow:auto}
+@media(min-width:640px){#chat.pg{padding:88px 32px 60px}}@media(min-width:1024px){#chat.pg{padding:96px 48px 64px}}
+.cw{display:flex;flex-direction:column;gap:16px;height:100%;min-height:540px}
+#lp{flex:1;min-height:0;display:flex;flex-direction:column;max-width:760px;width:100%;padding:16px}
+#chat #log{flex:1;height:auto;min-height:0;margin:0}
+#sum{margin-top:12px;max-height:50%;overflow:auto}
+.hb{display:flex;flex-direction:column;gap:20px}
+@media(min-width:1024px){.hb{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:32px}}
+.hl{max-width:36rem;width:100%}
+h1.ch{font-family:'Geist',sans-serif;font-weight:600;line-height:1.1;letter-spacing:-.025em;font-size:1.875rem;max-width:36rem}
+@media(min-width:640px){h1.ch{font-size:2.25rem}.cap{display:inline-flex;max-width:none}.cap input{width:256px;flex:none}}
+@media(min-width:1024px){h1.ch{font-size:3.5rem}}
+.cap{display:flex;align-items:center;background:#fff;border-radius:999px;padding:6px;margin-top:16px;max-width:460px}
+.cap input{border:0;background:transparent;color:#111;padding:8px 16px;border-radius:0}
+.cap input:focus{border:0}.cap input::placeholder{color:#9ca3af}
+.cap .gb{padding:10px 24px}
+#chat .chips{margin:12px 0}
+.cards{display:none;gap:20px}@media(min-width:1024px){.cards{display:flex}}
+.cards .card{width:256px;padding:24px}
+.big{font-family:'Silkscreen',cursive;font-size:36px;letter-spacing:-.02em;font-weight:400}
+.cards p{font-size:14px;line-height:1.6;opacity:.75;margin-top:14px}
+.ph{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none}.ph:hover{background:#eee}
+#seg button{font-size:13px;padding:6px 14px}
+.prev{align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}.prev img{width:52px;height:52px;object-fit:cover;border-radius:10px}
+.prev select{border-radius:999px;background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.25);padding:8px 12px;font:inherit;font-size:13px}
+.m img{max-width:220px;border-radius:10px;display:block;margin-bottom:6px}.m>li{margin-left:18px;list-style:disc}.m p{margin:4px 0}
+#lp{min-height:180px}
+@media print{body *{visibility:hidden}#sum,#sum *{visibility:visible}#sum{position:fixed;inset:0;color:#000;background:#fff}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body class="home">
+<canvas class="vid" id="bg" aria-hidden="true"></canvas>
+<video class="vid" id="v1" autoplay muted loop playsinline preload="auto" aria-hidden="true" poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/130837c4-0244-4f37-9c61-8d801d93fd29.jpg" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260912_104303_0c6d60b2-9353-408e-9449-585108a22fb5.mp4"></video>
+<video class="vid" id="v2" autoplay muted loop playsinline preload="auto" aria-hidden="true" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260803_192301_9231ed6b-c55c-4a48-909c-4ebe11cf2e11.mp4"></video>
+<div class="veil"></div>
+
+<header class="bar">
+  <a class="brand" href="#" data-go="home"><svg viewBox="0 0 23 17" aria-hidden="true"><path d="M8.15 0.9 L4.55 0.9 L0.5 9.3 L4.1 9.3 Z M17.0 0 L13.4 0 L6.15 16.4 L9.75 16.4 Z M22.9 0 L19.3 0 L15.0 7.6 L18.6 7.6 Z M22.6 6.9 L19.0 6.9 L14.05 16.4 L17.65 16.4 Z"/></svg>Virtual companion</a>
+  <nav class="pill glass desk" id="nav">
+    <button data-go="home">Home</button><button data-go="chat" data-new>New chat</button><button data-go="library">Library</button>
+  </nav>
+  <div class="right desk"><span id="who" class="mut" style="margin:0;align-self:center"></span><button class="gb" id="authBtn" data-go="login">Log in</button></div>
+  <button class="burger glass" id="burger" aria-label="Menu"><svg viewBox="0 0 22 14"><path d="M1 1H21M1 7H21M1 13H21"/></svg></button>
+</header>
+
+<div id="drawer"><div class="bd"></div><div class="pn">
+  <button data-go="home" style="transition-delay:.06s">Home</button><button data-go="chat" data-new style="transition-delay:.12s">New chat</button><button data-go="library" style="transition-delay:.18s">Library</button>
+  <button class="gb" id="authBtn2" data-go="login" style="margin-top:auto;text-align:center;transition-delay:.3s">Log in</button>
+</div></div>
+
+<section class="pg on" id="home">
+  <h1>Smarter Care Suggestions, Right When You Need Them.</h1>
+  <p class="sub">Describe a symptom or a condition and get treatment options, precautions and a diet plan to bring to your doctor.</p>
+  <a class="cta" href="#" data-go="chat" data-new>Start a new chat <svg viewBox="0 0 16 11"><path d="M0 5.5H14.6M10.3 1.2L14.9 5.5L10.3 9.8"/></svg></a>
+  <ul class="feats" id="feats"></ul>
+  <p class="foot">Health information only. Not a diagnosis or a replacement for a clinician.</p>
+</section>
+
+<section class="pg" id="chat"><div class="cw">
+  <div class="card glass" id="lp">
+    <div id="log" aria-live="polite"></div>
+    <div id="sum" class="card dk" style="display:none">
+      <b>Patient conversation summary</b><p class="mut" style="margin-top:2px;font-size:12px">Built only from what you typed. A clinician must verify it.</p>
+      <pre id="sumTxt"></pre>
+      <label class="mut" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ok" style="width:auto"> I approve this summary for sharing.</label>
+      <div class="row" style="margin-top:12px"><button class="gb" id="print">Print / save PDF</button></div>
+    </div>
+  </div>
+  <div class="hb">
+    <div class="hl">
+      <h1 class="ch">Ask about symptoms, treatment and diet</h1>
+      <div class="pill glass" id="seg" style="display:inline-flex;margin-top:14px" role="group" aria-label="What do you want?"><button class="on" data-m="all">Treatment + diet</button><button data-m="tx">Treatment</button><button data-m="diet">Diet plan</button></div>
+      <div class="prev" id="prev" style="display:none"><img alt="Selected injury photo"><select id="inj" aria-label="Injury type"></select><button class="gh" id="rm" style="padding:6px 14px">Remove</button></div>
+      <div class="cap"><button class="ph" id="photoBtn" aria-label="Upload injury photo" title="Upload injury photo"><svg viewBox="0 0 24 24" width="20" fill="none" stroke="#333" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><input type="file" id="photo" accept="image/*" hidden><input type="text" id="inp" placeholder="Describe symptoms or attach a photo" aria-label="Message"><button class="gb" id="send">Ask</button></div>
+      <div class="chips" id="chips"></div>
+      <div class="row"><button class="gh" id="sumBtn">Doctor summary</button><button class="gh" data-go="chat" data-new>New chat</button></div>
+    </div>
+    <div class="cards">
+      <div class="card glass" style="display:flex;flex-direction:column;justify-content:space-between"><div class="big">16+</div><p>Common conditions covered with treatment, precautions and diet plans.</p></div>
+      <div class="card glass"><div style="display:flex;gap:8px;align-items:center;font-weight:600;font-size:14px"><span style="width:24px;height:24px;border-radius:6px;background:#000;display:grid;place-items:center;font-weight:700">!</span>Safe by design</div><p>General information only. Emergency symptoms are flagged so you can call 112 or your local number right away.</p></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="pg" id="library"><div class="wrap">
+  <h2>Library</h2><p class="mut">Browse common conditions, or reopen your saved chats.</p>
+  <div class="tabs"><button class="on" data-tab="dis">Conditions</button><button data-tab="sav">Saved chats</button></div>
+  <div id="tdis"><input type="search" id="q" placeholder="Search conditions or symptoms" aria-label="Search"><div class="grid" id="grid"></div></div>
+  <div id="tsav" style="display:none"></div>
+</div></section>
+
+<section class="pg" id="login"><div class="wrap card glass" style="max-width:420px">
+  <h2 id="lt">Log in</h2><p class="mut">Your account keeps saved chats in this browser. Demo only: nothing is sent to a server.</p>
+  <label class="f" id="nmw" style="display:none">Name<input type="text" id="nm" autocomplete="name"></label>
+  <label class="f">Email<input type="email" id="em" autocomplete="email"></label>
+  <label class="f">Password<input type="password" id="pw" autocomplete="current-password"></label>
+  <p id="err" class="mut" style="color:#ffb4b4;min-height:20px"></p>
+  <button class="gb" id="go" style="width:100%;margin-top:6px;padding:13px">Log in</button>
+  <p class="mut" style="text-align:center"><button id="swap" style="text-decoration:underline">New here? Create an account</button></p>
+</div></section>
+
+<div id="modal"><div class="card" id="mb"></div></div>
+<p class="disc">Virtual companion gives general information only, not a diagnosis. In an emergency call your local emergency number (112 in India).</p>
+
+<script>
+var $=function(s){return document.querySelector(s)},$$=function(s){return [].slice.call(document.querySelectorAll(s))};
+function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+// name | keywords | symptoms | treatment | precautions | diet   (";" separates list items)
+var D=[
+["Common cold","cold,cough,runny nose,sneez,congestion,blocked nose","Runny nose; sneezing; sore throat; mild cough","Rest and fluids; salt-water gargles; honey (adults, kids over 1); steam inhalation; pharmacist-advised lozenges or decongestants","Wash hands often; cover coughs; avoid sharing towels; see a doctor if over 10 days or breathless","Warm soups; ginger-tulsi tea; citrus fruit; plenty of water; avoid cold drinks and fried food"],
+["Influenza (flu)","flu,fever,influenza,body ache,body pain,chills","Sudden fever; body aches; chills; dry cough; fatigue","Rest; fluids; paracetamol for fever (per pack); doctor may prescribe antivirals if seen early","Yearly flu vaccine; isolate while feverish; mask around others; high-risk people should see a doctor early","Broths; khichdi; fruit; coconut water; electrolytes; light protein like eggs or dal"],
+["Type 2 diabetes","diabetes,sugar,thirst,frequent urination,blurred vision,high blood sugar","Increased thirst and urination; fatigue; blurred vision; slow-healing wounds","Doctor-guided medicines or insulin; regular glucose checks; weight management; 150 min/week of activity; yearly eye, foot and kidney checks","Never skip meds; check feet daily; keep HbA1c follow-ups; carry a sugar source in case of lows","Whole grains, millets, oats; non-starchy vegetables; dal, paneer, eggs, fish; nuts; limit sweets, white rice/bread and sugary drinks; fixed meal times"],
+["Hypertension (high BP)","hypertension,blood pressure,bp,high bp,pounding headache","Often none; headaches; dizziness; nosebleeds in severe cases","Doctor-prescribed BP medicines; DASH-style diet; regular exercise; weight loss; home BP log","Cut salt and alcohol; quit smoking; manage stress and sleep; never stop medicine suddenly","Fruits, vegetables, bananas, low-fat dairy, whole grains, unsalted nuts; under 5 g salt/day; avoid pickles, papad, chips, processed food"],
+["Asthma","asthma,wheez,shortness of breath,tight chest,breathless","Wheezing; chest tightness; breathlessness; night or exercise cough","Reliever and controller inhalers as prescribed; written asthma action plan; peak-flow tracking","Avoid dust, smoke and known triggers; keep inhaler handy; get flu shot; seek urgent care if the reliever does not help","Fruits and vegetables rich in vitamin C/E; omega-3 fish or flax; warm fluids; avoid known food triggers; keep weight healthy"],
+["Dengue","dengue,fever,mosquito,rash and fever,pain behind eyes,platelet","High fever; severe headache; pain behind eyes; joint pain; rash","Rest; lots of fluids/ORS; paracetamol only (avoid ibuprofen/aspirin); doctor monitoring of platelets; hospital if bleeding or severe pain","Remove standing water; use repellents and nets; long sleeves; go to hospital for vomiting, bleeding gums or drowsiness","Coconut water; ORS; papaya leaf juice (commonly used, evidence limited); soups; pomegranate; soft, easily digested food"],
+["Malaria","malaria,fever,fever with shivering,fever and chills,alternate day fever","Cyclic fever with chills and sweating; headache; vomiting","Blood test confirmation; full course of prescribed antimalarials; rest and fluids","Nets and repellents; clear stagnant water; prophylaxis when travelling to risk areas; treat early","Fluids and ORS; rice gruel; fruit; iron-rich foods (spinach, jaggery, dates) in recovery; avoid heavy oily food"],
+["Typhoid","typhoid,fever,enteric,step ladder fever,persistent fever","Slow-rising fever; weakness; stomach pain; constipation or diarrhoea; headache","Blood culture/Widal confirmation; doctor-prescribed antibiotics; fluids; rest","Boiled or filtered water; eat freshly cooked food; wash hands; typhoid vaccine; avoid street food","Soft, bland food: khichdi, curd rice, banana, toast; ORS; boiled potatoes; avoid raw salads, spicy and oily food"],
+["Gastroenteritis (stomach flu)","stomach,diarrhea,diarrhoea,vomit,nausea,loose motion,food poisoning","Loose stools; vomiting; cramps; mild fever","ORS in small frequent sips; rest; zinc for children as advised; doctor for blood, high fever or over 2 days","Wash hands; safe water; refrigerate food; avoid street food during outbreaks; watch for dehydration","BRAT-style foods: banana, rice, applesauce, toast; curd; coconut water; avoid dairy (except curd), caffeine and spicy food"],
+["Migraine","migraine,headache,throbbing head,light sensitivity,aura","One-sided throbbing headache; nausea; light and sound sensitivity","Rest in a dark, quiet room; OTC pain relief early; doctor-prescribed triptans or preventives if frequent","Keep a trigger diary; regular sleep and meals; hydrate; limit screen glare; urgent care for a sudden 'worst headache'","Regular meals; magnesium foods (nuts, greens); hydration; limit caffeine swings, aged cheese, processed meats, alcohol"],
+["Iron-deficiency anaemia","anemia,anaemia,pale,tired,fatigue,weakness,dizzy,low hemoglobin","Fatigue; pale skin; dizziness; breathlessness; brittle nails","Blood tests; iron (and B12/folate if needed) as advised; find the cause such as heavy periods or worms","Take iron with vitamin C, away from tea/coffee; regular check-ups; deworm as advised","Spinach, beetroot, dates, jaggery, lentils, red meat, eggs; pair with lemon or amla; avoid tea/coffee with meals"],
+["Urinary tract infection","uti,urine infection,burning urination,burning urine,urinary","Burning while urinating; frequent urge; cloudy or smelly urine; lower belly pain","Urine test; doctor-prescribed antibiotics; plenty of water; see a doctor fast for fever or back pain","Drink water; do not hold urine; wipe front to back; urinate after intercourse; cotton underwear","Water 2-3 L/day; curd; cranberry or barley water; vitamin C fruits; limit caffeine, alcohol and spicy food"],
+["Acid reflux (GERD)","acid reflux,gerd,heartburn,acidity,gas,indigestion,bloating,sour belching","Burning chest; sour taste; bloating; belching","Antacids or doctor-prescribed acid reducers; small meals; raise head of bed; review if over 2 weeks","Do not lie down 3 h after food; avoid tight clothes; quit smoking; lose excess weight; see a doctor for trouble swallowing","Oats, bananas, melon, ginger tea, whole grains, lean protein; avoid spicy, fried, citrus, tomato, coffee, chocolate, late dinners"],
+["Pneumonia","pneumonia,chest infection,productive cough,phlegm,cough with fever","Fever; cough with phlegm; chest pain when breathing; breathlessness","Prompt doctor review and chest X-ray; antibiotics if bacterial; rest and fluids; hospital if oxygen is low","Pneumococcal and flu vaccines; do not smoke; wash hands; see a doctor early for fast breathing","Warm soups; protein (eggs, dal, chicken); vitamin C fruits; plenty of fluids; small frequent meals"],
+["Arthritis","arthritis,joint pain,knee pain,stiff joints,swollen joints,joint stiffness","Joint pain; morning stiffness; swelling; reduced movement","Physiotherapy; low-impact exercise; hot/cold packs; doctor-advised pain relief or disease-modifying drugs; weight loss","Protect joints; avoid overuse; stay active; check with a doctor before long-term painkillers","Omega-3 fish, walnuts, olive oil, turmeric in food, leafy greens, berries; limit sugar, refined carbs and fried food"],
+["High cholesterol","cholesterol,lipid,triglyceride,fatty liver","Usually none; found on a lipid blood test","Lifestyle change; statins if your doctor advises; repeat lipid profile","Exercise 30 min most days; stop smoking; limit alcohol; regular screening if family history","Oats, beans, nuts, flaxseed, fish, fruit; olive or mustard oil in moderation; avoid trans fats, ghee excess, bakery and fried items"]
+];
+var EMG=['chest pain','cant breathe',"can't breathe",'cannot breathe','severe bleeding','unconscious','stroke','face droop','seizure','vomiting blood'],CRI=['suicide','kill myself','end my life','self harm','want to die'];
+var TIPS=[["Fever","high fever with body pain"],["Sugar levels","I have diabetes, what should I eat"],["Sore throat","sore throat and cough"],["Stomach upset","loose motions and vomiting"],["Diet","give me a healthy diet plan"],["Blood pressure","high blood pressure"]];
+var cur,user=ld('vc_user',null),chats=ld('vc_chats',[]);
+function li(s){return '<ul>'+s.split(';').map(function(x){return '<li>'+x.trim()+'</li>'}).join('')+'</ul>'}
+function card(d){return '<h4>'+d[0]+'</h4><h5>Common symptoms</h5>'+li(d[2])+'<h5>Suggested treatment</h5>'+li(d[3])+'<h5>Precautions</h5>'+li(d[4])+'<h5>Diet plan</h5>'+li(d[5])+'<small>General information, not a diagnosis. Confirm medicines and doses with a doctor or pharmacist.</small>'}
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function find(t){t=t.toLowerCase();return D.map(function(d){var n=0;d[1].split(',').forEach(function(k){if(t.indexOf(k)>-1)n+=k.length>4?2:1});if(t.indexOf(d[0].toLowerCase())>-1)n+=3;return[n,d]}).filter(function(x){return x[0]>0}).sort(function(a,b){return b[0]-a[0]}).map(function(x){return x[1]})}
+function reply(t){var l=t.toLowerCase();
+ if(CRI.some(function(w){return l.indexOf(w)>-1}))return '<p>I am glad you told me. Please reach out now: India Tele-MANAS 14416, US/Canada call or text 988, UK Samaritans 116 123, or your local emergency number. If you are in immediate danger call emergency services. You do not have to face this alone.</p>';
+ if(EMG.some(function(w){return l.indexOf(w)>-1}))return '<p><b>This could be a medical emergency.</b> Call your local emergency number (112 in India) or go to the nearest hospital now instead of waiting on this chat.</p>';
+ var m=find(t);
+ if(m.length){var o=m.slice(1,3).map(function(d){return d[0]}).join(', ');return card(m[0])+(o?'<p style="margin-top:8px">Other possibilities to mention to your doctor: '+o+'.</p>':'')}
+ if(/diet|nutrition|healthy eating|weight|food/.test(l))return '<h4>General healthy diet plan</h4>'+li('Half your plate vegetables and fruit; a quarter whole grains or millets; a quarter protein (dal, eggs, fish, paneer, chicken)')+li('Healthy fats: nuts, seeds, olive or mustard oil in small amounts;Limit sugar, refined flour, deep-fried and packaged food;Drink 2-3 L water; keep regular meal times;Aim for about 0.5 kg per week if losing weight')+'<p style="margin-top:8px">Tell me a condition (for example diabetes or BP) for a tailored plan, or see a dietitian.</p>';
+ return '<p>I do not have specific guidance for that yet. Could you describe your main symptom, how long you have had it, and any fever or pain? You can also browse the Library for conditions I cover.</p>'}
+function add(w,h,keep){var d=document.createElement('div');d.className='m '+(w=='u'?'u':'b');if(w=='u')d.textContent=h;else d.innerHTML=h;$('#log').appendChild(d);$('#log').scrollTop=1e6;if(!keep)cur.msgs.push({w:w,h:h})}
+function save(){if(!cur.msgs.some(function(m){return m.w=='u'}))return;var i=chats.findIndex(function(c){return c.id==cur.id});cur.t=cur.msgs.filter(function(m){return m.w=='u'})[0].h.slice(0,60);if(i<0)chats.unshift(cur);else chats[i]=cur;chats=chats.slice(0,30);sv('vc_chats',chats)}
+function newChat(){cur={id:Date.now(),t:'',msgs:[]};$('#log').innerHTML='';$('#sum').style.display='none';add('b','<p>Hi, I am Virtual companion. Choose Treatment, Diet plan or both above, type a symptom or condition, or tap the camera to upload a photo of an injury.</p>')}
+function openChat(c){cur=JSON.parse(JSON.stringify(c));$('#log').innerHTML='';$('#sum').style.display='none';cur.msgs.forEach(function(m){add(m.w,m.h,1)});go('chat')}
+function send(){var i=$('#inp'),t=i.value.trim();if(!t)return;i.value='';add('u',t);setTimeout(function(){add('b',reply(t));save()},350)}
+function summary(){var u=cur.msgs.filter(function(m){return m.w=='u'}).map(function(m){return m.h});if(!u.length){return 'Send a message first. Your summary will appear here.'}
+ var c=find(u.join(' ')).slice(0,3).map(function(d){return d[0]});
+ return 'Reported by patient:\n'+u.map(function(x,i){return (i+1)+'. '+x}).join('\n')+'\n\nConditions discussed (informational only): '+(c.join(', ')||'none matched')+'\n\nQuestions to ask: What should I track? What would mean I need care sooner? What are the next steps?\n\nNo clinical conclusion is included.'}
+function go(p){$$('.pg').forEach(function(s){s.classList.toggle('on',s.id==p)});document.body.classList.toggle('home',p=='home');kickVid(p=='home');$$('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.go==p)});$('#drawer').classList.remove('open');$('#'+p).scrollTop=0;if(p=='library')lib();if(p=='login')mode(0)}
+function kickVid(h){var a=$(h?'#v1':'#v2'),b=$(h?'#v2':'#v1');if(b)b.pause();if(a&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)){var q=a.play();if(q&&q.catch)q.catch(function(){})}}
+function grid(){var q=$('#q').value.toLowerCase();$('#grid').innerHTML='';D.filter(function(d){return !q||(d[0]+d[1]+d[2]).toLowerCase().indexOf(q)>-1}).forEach(function(d){var b=document.createElement('button');b.className='card glass';b.innerHTML='<b>'+d[0]+'</b><span>'+d[2]+'</span>';b.onclick=function(){$('#mb').innerHTML=card(d)+'<div class="row" style="margin-top:14px"><button class="gb" id="mc">Close</button></div>';$('#mb').className='card';$('#modal').classList.add('on');$('#mc').focus();$('#mc').onclick=function(){$('#modal').classList.remove('on')}};$('#grid').appendChild(b)});if(!$('#grid').children.length)$('#grid').innerHTML='<p class="mut">No match. Try another symptom or name.</p>'}
+function lib(){grid();var t=$('#tsav');t.innerHTML='';if(!chats.length)t.innerHTML='<p class="mut" style="margin-top:14px">No saved chats yet. Start a new chat and it will appear here.</p>';chats.forEach(function(c){var d=document.createElement('div');d.className='sv glass';d.innerHTML='<div><b>'+esc(c.t||'Chat')+'</b><span>'+new Date(c.id).toLocaleString()+'</span></div><div class="row"><button class="gh">Open</button><button class="gh">Delete</button></div>';var b=d.querySelectorAll('button');b[0].onclick=function(){openChat(c)};b[1].onclick=function(){chats=chats.filter(function(x){return x.id!=c.id});sv('vc_chats',chats);lib()};t.appendChild(d)})}
+var reg=0;function mode(r){reg=r;$('#lt').textContent=r?'Create account':'Log in';$('#go').textContent=r?'Create account':'Log in';$('#nmw').style.display=r?'block':'none';$('#swap').textContent=r?'Have an account? Log in':'New here? Create an account';$('#err').textContent=''}
+function auth(){var e=$('#em').value.trim().toLowerCase(),p=$('#pw').value,n=$('#nm').value.trim(),us=ld('vc_users',{});
+ if(!/^\S+@\S+\.\S+$/.test(e))return $('#err').textContent='Enter a valid email address.';
+ if(p.length<6)return $('#err').textContent='Password must be at least 6 characters.';
+ if(reg){if(!n)return $('#err').textContent='Enter your name.';if(us[e])return $('#err').textContent='That email already has an account. Log in instead.';us[e]={n:n,p:btoa(unescape(encodeURIComponent(p)))};sv('vc_users',us)}
+ else if(!us[e]||us[e].p!==btoa(unescape(encodeURIComponent(p))))return $('#err').textContent='Email or password is incorrect.';
+ user={e:e,n:us[e].n};sv('vc_user',user);$('#pw').value='';paint();go('chat')}
+function paint(){$('#who').textContent=user?user.n:'';['#authBtn','#authBtn2'].forEach(function(s){$(s).textContent=user?'Log out':'Log in'})}
+$$('[data-go]').forEach(function(e){e.addEventListener('click',function(ev){ev.preventDefault();var p=e.dataset.go;if(e.id&&e.id.indexOf('authBtn')==0&&user){user=null;sv('vc_user',null);paint();return go('home')}if(e.hasAttribute('data-new'))newChat();go(p)})});
+$('#burger').onclick=function(){$('#drawer').classList.toggle('open')};$('#drawer .bd').onclick=function(){$('#drawer').classList.remove('open')};
+document.addEventListener('keydown',function(e){if(e.key=='Escape'){$('#drawer').classList.remove('open');$('#modal').classList.remove('on')}});
+$('#modal').onclick=function(e){if(e.target.id=='modal')$('#modal').classList.remove('on')};
+$('#send').onclick=send;$('#inp').onkeydown=function(e){if(e.key=='Enter')send()};
+$('#sumBtn').onclick=function(){$('#sumTxt').textContent=summary();$('#sum').style.display='block'};
+$('#print').onclick=function(){if($('#ok').checked)window.print();else alert('Tick the approval box first.')};
+$('#q').oninput=grid;$$('.tabs button').forEach(function(b){b.onclick=function(){$$('.tabs button').forEach(function(x){x.classList.toggle('on',x==b)});$('#tdis').style.display=b.dataset.tab=='dis'?'block':'none';$('#tsav').style.display=b.dataset.tab=='sav'?'block':'none'}});
+$('#go').onclick=auth;$('#swap').onclick=function(){mode(!reg)};$('#pw').onkeydown=function(e){if(e.key=='Enter')auth()};
+TIPS.forEach(function(t){var b=document.createElement('button');b.className='chip';b.textContent=t[0];b.onclick=function(){$('#inp').value=t[1];send()};$('#chips').appendChild(b)});
+['Treatments and precautions','Personalised diet plans','Doctor-ready summaries','16 common conditions'].forEach(function(f){$('#feats').insertAdjacentHTML('beforeend','<li><svg viewBox="0 0 11 20" style="height:14px"><path d="M1.15 1.15L9.6 10L1.15 18.85"/></svg>'+f+'</li>')});
+(function(){var q=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)');if(!q)return;function s(){$$('video').forEach(function(v){if(q.matches)v.pause();else{var p=v.play();if(p)p.catch(function(){})}})}s();q.addEventListener?q.addEventListener('change',s):q.addListener(s)})();
+
+var MODE='all',PH=null,I=[
+["Cut or scrape","Rinse with clean running water;Press firmly with a clean cloth for 10 minutes to stop bleeding;Clean around it with mild soap;Cover with a sterile dressing and change it daily","Bleeding will not stop after 10 minutes;Deep, gaping or dirty wound;Animal bite;No tetanus shot in 5-10 years;Redness, pus or fever later"],
+["Burn","Cool under cool (not icy) running water for 20 minutes;Remove rings and tight items before swelling;Cover loosely with a clean non-stick dressing;Do not burst blisters or apply butter, oil or toothpaste","Larger than your palm;Face, hands, genitals or joints;Deep, white or charred skin;Chemical or electrical burn;A child or older adult"],
+["Sprain or swelling","Rest the area;Ice wrapped in a cloth for 15-20 minutes every 2-3 hours;Light compression bandage;Raise the limb;Gentle movement once pain eases","Cannot bear weight;Obvious deformity;Numb, pale or cold skin;Severe pain;No improvement in 2-3 days (possible fracture)"],
+["Bruise","Cold pack for the first 24 hours;Rest and raise the area;After 48 hours try a warm compress","Very large or painful lump;Bruising without an injury;Head, belly or chest injury;On blood thinners;Not fading in 2 weeks"],
+["Rash or skin irritation","Stop the likely trigger;Wash gently with lukewarm water and pat dry;Cool compress;Fragrance-free moisturiser;Avoid scratching","Spreading fast;Fever;Blisters or pus;Face or mouth swelling;Trouble breathing;Lasts over a week"],
+["Insect bite or sting","Remove any sting by scraping, not squeezing;Wash the area;Cold compress;Avoid scratching and keep it clean","Trouble breathing or swelling of face or throat (emergency);Spreading redness;Snake or dog bite;Fever"]];
+EMG.push('heavy bleeding',"won't stop bleeding",'wont stop bleeding');
+function part(d,m){var h='<h4>'+d[0]+'</h4>';if(m=='all')h+='<h5>Common symptoms</h5>'+li(d[2]);if(m=='all'||m=='tx')h+='<h5>Suggested treatment</h5>'+li(d[3]);if(m=='all'||m=='pre')h+='<h5>Precautions</h5>'+li(d[4]);if(m=='all'||m=='diet')h+='<h5>Diet plan</h5>'+li(d[5]);return h}
+function card(d,m){m=m||'all';var i=D.indexOf(d);return part(d,m)+'<div class="chips" style="margin-top:10px">'+[['tx','Treatment'],['diet','Diet plan'],['pre','Precautions'],['all','Full guide']].filter(function(b){return b[0]!=m}).map(function(b){return '<button class="chip qa" data-d="'+i+'" data-m="'+b[0]+'">'+b[1]+'</button>'}).join('')+'</div><small>General information, not a diagnosis. Confirm medicines and doses with a doctor or pharmacist.</small>'}
+function intent(t){var l=t.toLowerCase().replace(/food poisoning/g,''),a=/treat|medic|cure|remed|therapy|what to do|relief/.test(l),b=/diet|\beat\b|food|meal|nutrition/.test(l);return a&&!b?'tx':b&&!a?'diet':MODE}
+function reply(t){var l=t.toLowerCase();
+ if(CRI.some(function(w){return l.indexOf(w)>-1}))return '<p>I am glad you told me. Please reach out now: India Tele-MANAS 14416, US/Canada call or text 988, UK Samaritans 116 123, or your local emergency number. If you are in immediate danger call emergency services. You do not have to face this alone.</p>';
+ if(EMG.some(function(w){return l.indexOf(w)>-1}))return '<p><b>This could be a medical emergency.</b> Call your local emergency number (112 in India) or go to the nearest hospital now instead of waiting on this chat.</p>';
+ var m=find(t),k=intent(t);
+ if(m.length){var o=m.slice(1,3).map(function(d){return d[0]}).join(', ');return card(m[0],k)+(o?'<p style="margin-top:8px">Other possibilities to mention to your doctor: '+o+'.</p>':'')}
+ if(k=='diet'&&/diet|nutrition|healthy|weight|food|meal/.test(l))return '<h4>General healthy diet plan</h4>'+li('Half your plate vegetables and fruit; a quarter whole grains or millets; a quarter protein (dal, eggs, fish, paneer, chicken);Healthy fats: nuts, seeds, olive or mustard oil in small amounts;Limit sugar, refined flour, deep-fried and packaged food;Drink 2-3 L water and keep regular meal times')+'<p style="margin-top:8px">Pick a condition below for a tailored plan.</p>'+cq();
+ return '<p>I could not match that to a condition yet. Try a symptom such as fever, cough, joint pain or stomach ache, or pick a condition:</p>'+cq()}
+function cq(){return '<div class="chips" style="margin-top:8px">'+D.slice(0,8).map(function(d){return '<button class="chip cq">'+d[0]+'</button>'}).join('')+'</div>'}
+function fmt(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').split('\n').map(function(l){return /^\s*[-\u2022]\s+/.test(l)?'<li>'+l.replace(/^\s*[-\u2022]\s+/,'')+'</li>':l.trim()?'<p>'+l+'</p>':''}).join('')}
+function send(){var i=$('#inp'),t=i.value.trim();if(!t&&!PH)return;i.value='';
+ if(PH){var ph=PH,ty=$('#inj').value;clr();var d=document.createElement('div');d.className='m u';var im=new Image();im.src=ph.url;im.alt='Injury photo';d.appendChild(im);if(t)d.appendChild(document.createTextNode(t));$('#log').appendChild(d);cur.msgs.push({w:'u',h:'Photo of injury ('+ty+')'+(t?': '+t:'')});return injury(ph.blob,ty,t)}
+ add('u',t);setTimeout(function(){add('b',reply(t));save()},350)}
+function injury(blob,ty,note){var box=document.createElement('div');box.className='m b';box.textContent='Looking at your photo...';$('#log').appendChild(box);$('#log').scrollTop=1e6;
+ function done(){cur.msgs.push({w:'b',h:box.innerHTML});save();$('#log').scrollTop=1e6}
+ function fb(why){var e=I.filter(function(x){return x[0]==ty})[0]||I[0];box.innerHTML='<p>'+why+'</p><h4>'+e[0]+': what to do</h4><h5>First aid</h5>'+li(e[1])+'<h5>See a doctor or emergency care if</h5>'+li(e[2])+'<small>General information, not a diagnosis.</small>';done()}
+ var why='I could not analyse the photo here, so these are general steps.';
+ if(typeof claude==='undefined'||!claude.use)return fb(why);
+ var pr='You are the first-aid guidance helper on a health-information website. The person uploaded a photo of an injury (they say it is: '+ty+'.'+(note?' Their note: '+note:'')+'). Reply in plain language under 220 words with these headings in bold: **What I can see** (describe only, never diagnose, say if the photo is unclear), **What to do now** (short first-aid steps), **What to avoid**, **See a doctor or emergency care if** (red flags such as deep wound, heavy bleeding, infection signs, large burn, numbness, deformity, head injury). Use "- " bullets. Never give medicine doses. If the photo suggests something life-threatening, begin with: Call your emergency number (112 in India) now.';
+ claude.use('sample').then(function(sm){if(!sm)return fb(why);return sm.limits().then(function(l){if(!l.images)return fb(why);return sm(pr,{images:blob,cache:false,onText:function(o){box.innerHTML=fmt(o.text);$('#log').scrollTop=1e6}}).then(function(r){box.innerHTML=fmt(r.text)+'<small>General information, not a diagnosis. Confirm with a doctor.</small>';done()})})}).catch(function(e){fb('I could not analyse the photo ('+((e&&e.code)||'error')+'), so these are general steps.')})}
+function clr(){PH=null;$('#prev').style.display='none'}
+I.forEach(function(x){$('#inj').add(new Option(x[0],x[0]))});
+$('#photoBtn').onclick=function(){$('#photo').click()};$('#rm').onclick=clr;
+$('#photo').onchange=function(){var f=this.files[0];this.value='';if(!f)return;if(!/^image\//.test(f.type))return alert('Choose an image file.');var fr=new FileReader();fr.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,1024/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);var u=cv.toDataURL('image/jpeg',.85);cv.toBlob(function(b){PH={blob:b,url:u};$('#prev img').src=u;$('#prev').style.display='flex'},'image/jpeg',.85)};im.onerror=function(){alert('That image could not be opened. Try a JPG or PNG.')};im.src=fr.result};fr.readAsDataURL(f)};
+$$('#seg button').forEach(function(b){b.onclick=function(){MODE=b.dataset.m;$$('#seg button').forEach(function(x){x.classList.toggle('on',x==b)})}});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.qa,.cq');if(!b)return;if(b.classList.contains('cq')){$('#inp').value=b.textContent;return send()}
+ var d=D[b.dataset.d],m=b.dataset.m;if(b.closest('#log')){add('b',card(d,m));save()}else{$('#mb').innerHTML=card(d,m)+'<div class="row" style="margin-top:14px"><button class="gb" id="mc">Close</button></div>';$('#mc').onclick=function(){$('#modal').classList.remove('on')}}});
+$('#send').onclick=send;$('#inp').onkeydown=function(e){if(e.key=='Enter')send()};
+(function(){var c=$('#bg'),x=c.getContext('2d'),W,H,r=1,t=0,rm=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+function rs(){r=Math.min(window.devicePixelRatio||1,1.5);W=c.width=Math.round(innerWidth*r);H=c.height=Math.round(innerHeight*r)}
+function draw(){var home=document.body.classList.contains('home'),k=home?1:.5,cx=W/2,cy=H/2,g,i,n=26;
+ g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#04070f');g.addColorStop(.6,'#081426');g.addColorStop(1,'#050b17');x.globalCompositeOperation='source-over';x.fillStyle=g;x.fillRect(0,0,W,H);
+ [[.25,.85,.55,.0],[.7,.9,.6,2],[.5,.7,.5,4]].forEach(function(o){var px=W*(o[0]+.08*Math.sin(t*.15+o[3])),py=H*o[1],rad=Math.max(W,H)*o[2];g=x.createRadialGradient(px,py,0,px,py,rad);g.addColorStop(0,'rgba(20,50,100,'+(.55*k+.1)+')');g.addColorStop(1,'rgba(20,50,100,0)');x.fillStyle=g;x.fillRect(0,0,W,H)});
+ x.globalCompositeOperation='lighter';x.lineCap='round';
+ for(var kx=0;kx<2;kx++)for(var ky=0;ky<2;ky++){var sg=ky?-1:1,gold=!ky;
+  for(i=0;i<n;i++){var f=i/(n-1),w=Math.sin(t*.6+i*.7+kx*2+ky)*.025,sx=kx*W,sy=ky*H+sg*f*H*.5;
+   x.beginPath();x.moveTo(sx,sy);x.quadraticCurveTo(W*(kx?.66:.34)+w*W,H*(ky?.64:.36)+(f-.5)*H*.22,cx,cy);
+   x.strokeStyle=gold?'rgba(255,196,110,'+(.05+.22*(1-f))*k+')':'rgba(110,170,255,'+(.05+.2*(1-f))*k+')';x.lineWidth=(1+(i%3)*.5)*r;x.stroke()}}
+ var rad=Math.min(W,H)*(.32+.03*Math.sin(t*.8)+Math.min(t*.01,.05));g=x.createRadialGradient(cx,cy,0,cx,cy,rad);g.addColorStop(0,'rgba(255,255,255,'+.95*k+')');g.addColorStop(.15,'rgba(255,236,200,'+.5*k+')');g.addColorStop(.5,'rgba(120,170,255,'+.14*k+')');g.addColorStop(1,'rgba(120,170,255,0)');x.fillStyle=g;x.fillRect(0,0,W,H)}
+function loop(){t+=.016;draw();requestAnimationFrame(loop)}
+rs();draw();addEventListener('resize',function(){rs();draw()});if(!rm)requestAnimationFrame(loop);
+new MutationObserver(draw).observe(document.body,{attributes:true,attributeFilter:['class']})})();
+newChat();paint();
+</script>
+</body>
+</html>
